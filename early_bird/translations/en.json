@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "child_name": {
+      "name": "Child Name",
+      "description": "The name of your child"
+    },
+    "birth_date": {
+      "name": "Birth Date",
+      "description": "The actual birth date (YYYY-MM-DD)"
+    },
+    "due_date": {
+      "name": "Due Date",
+      "description": "The originally calculated due date (YYYY-MM-DD)"
+    },
+    "language": {
+      "name": "Language",
+      "description": "User interface language"
+    },
+    "notifications_enabled": {
+      "name": "Notifications Enabled",
+      "description": "Enable Home Assistant notifications for developmental leaps"
+    }
+  },
+  "state": {
+    "corrected_age": "Corrected Age",
+    "actual_age": "Actual Age",
+    "wonder_week": "Wonder Week",
+    "milestone": "Milestone",
+    "growth": "Growth"
+  },
+  "wonder_weeks": {
+    "5": "Changing Sensations",
+    "8": "Patterns",
+    "12": "Smooth Transitions",
+    "19": "Events",
+    "26": "Relationships",
+    "37": "Categories",
+    "46": "Sequences",
+    "55": "Programs",
+    "64": "Principles",
+    "75": "Systems"
+  },
+  "categories": {
+    "motor": "Motor Skills",
+    "cognitive": "Cognitive",
+    "language": "Language"
+  },
+  "notifications": {
+    "wonder_week_starting": "A new developmental leap is starting!",
+    "milestone_due": "A milestone is coming up",
+    "growth_reminder": "Time for a growth measurement"
+  }
+}
