@@ -1,0 +1,177 @@
+# Example Lovelace Dashboard Card Configuration for Early Bird
+# Copy this to your Home Assistant Lovelace configuration
+
+# Option 1: Simple iframe card to embed the addon
+type: iframe
+url: /api/hassio_ingress/early_bird
+aspect_ratio: 16:9
+title: Early Bird - Entwicklungstracker
+
+---
+
+# Option 2: REST sensors for detailed integration
+# Add this to your configuration.yaml:
+
+sensor:
+  # Corrected Age Sensor
+  - platform: rest
+    name: baby_corrected_age_weeks
+    resource: http://localhost:8099/api/age
+    value_template: "{{ value_json.corrected_age.total_weeks }}"
+    unit_of_measurement: "Wochen"
+    scan_interval: 3600
+    json_attributes:
+      - corrected_age
+      - actual_age
+      - prematurity
+
+  - platform: template
+    sensors:
+      baby_corrected_age:
+        friendly_name: "Korrigiertes Alter"
+        value_template: >
+          {% set data = state_attr('sensor.baby_corrected_age_weeks', 'corrected_age') %}
+          {{ data.years }}J {{ data.months }}M {{ data.weeks }}W {{ data.days }}T
+        icon_template: mdi:baby-face
+
+      baby_actual_age:
+        friendly_name: "Tatsächliches Alter"
+        value_template: >
+          {% set data = state_attr('sensor.baby_corrected_age_weeks', 'actual_age') %}
+          {{ data.years }}J {{ data.months }}M {{ data.weeks }}W {{ data.days }}T
+        icon_template: mdi:calendar
+
+  # Wonder Week Sensor
+  - platform: rest
+    name: baby_wonder_week
+    resource: http://localhost:8099/api/wonder-weeks
+    value_template: "{{ value_json.current_week }}"
+    unit_of_measurement: "Woche"
+    scan_interval: 3600
+    json_attributes:
+      - current_leap
+      - next_leap
+
+  - platform: template
+    sensors:
+      baby_wonder_week_status:
+        friendly_name: "Wonder Week Status"
+        value_template: >
+          {% if state_attr('sensor.baby_wonder_week', 'current_leap') %}
+          Sprung aktiv: {{ state_attr('sensor.baby_wonder_week', 'current_leap').name }}
+          {% elif state_attr('sensor.baby_wonder_week', 'next_leap') %}
+          Nächster Sprung: Woche {{ state_attr('sensor.baby_wonder_week', 'next_leap').week }}
+          {% else %}
+          Alle Sprünge abgeschlossen
+          {% endif %}
+        icon_template: mdi:star
+
+---
+
+# Option 3: Dashboard card using entities
+type: entities
+title: 🐣 Early Bird Entwicklung
+entities:
+  - entity: sensor.baby_corrected_age
+    name: Korrigiertes Alter
+    icon: mdi:baby-face
+  - entity: sensor.baby_actual_age
+    name: Tatsächliches Alter
+    icon: mdi:calendar
+  - entity: sensor.baby_corrected_age_weeks
+    name: Korrigiert (Wochen)
+    icon: mdi:counter
+  - entity: sensor.baby_wonder_week
+    name: Aktuelle Woche
+    icon: mdi:numeric
+  - type: divider
+  - type: button
+    name: Dashboard öffnen
+    icon: mdi:chart-line
+    tap_action:
+      action: url
+      url_path: /api/hassio_ingress/early_bird
+
+---
+
+# Option 4: Automation examples for notifications
+
+automation:
+  # Notify when a new Wonder Week starts
+  - alias: "Wonder Week Benachrichtigung"
+    description: "Benachrichtigung wenn ein neuer Entwicklungssprung beginnt"
+    trigger:
+      - platform: state
+        entity_id: sensor.baby_wonder_week
+    condition:
+      - condition: template
+        value_template: "{{ state_attr('sensor.baby_wonder_week', 'current_leap') != None }}"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "🌟 Neuer Entwicklungssprung!"
+          message: >
+            {{ state_attr('sensor.baby_wonder_week', 'current_leap').name }} 
+            (Woche {{ state_attr('sensor.baby_wonder_week', 'current_leap').week }})
+          data:
+            tag: "wonder_week"
+            group: "early_bird"
+
+  # Weekly reminder to record growth
+  - alias: "Wachstum erfassen Erinnerung"
+    description: "Wöchentliche Erinnerung für Wachstumsmessung"
+    trigger:
+      - platform: time
+        at: "10:00:00"
+    condition:
+      - condition: time
+        weekday:
+          - mon
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "📊 Wachstum erfassen"
+          message: "Zeit für eine neue Wachstumsmessung!"
+          data:
+            tag: "growth_reminder"
+            group: "early_bird"
+            actions:
+              - action: "OPEN_EARLY_BIRD"
+                title: "Öffnen"
+
+---
+
+# Option 5: Picture Elements Card (visual representation)
+type: picture-elements
+image: /local/baby_background.jpg  # Replace with your image
+elements:
+  - type: state-label
+    entity: sensor.baby_corrected_age
+    prefix: "Korrigiertes Alter: "
+    style:
+      top: 20%
+      left: 50%
+      color: white
+      font-size: 20px
+      font-weight: bold
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8)
+
+  - type: state-label
+    entity: sensor.baby_wonder_week_status
+    style:
+      top: 40%
+      left: 50%
+      color: white
+      font-size: 16px
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8)
+
+  - type: icon
+    icon: mdi:baby-face
+    style:
+      top: 60%
+      left: 50%
+      color: white
+      "--mdc-icon-size": 60px
+    tap_action:
+      action: url
+      url_path: /api/hassio_ingress/early_bird
