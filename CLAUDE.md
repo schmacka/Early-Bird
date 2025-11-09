@@ -6,6 +6,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Early Bird is a Home Assistant addon for tracking premature children's development using corrected age calculations, Wonder Weeks integration, and milestone tracking. All calculations use corrected age (from due date, not birth date) which is critical for premature babies.
 
+## Key Planned Feature: Daily Summary
+
+**Daily Developmental Summary** - A comprehensive daily summary feature that provides parents with context-aware guidance throughout the first year.
+
+### Feature Requirements
+
+**What it should provide**:
+- Current developmental phase based on corrected age
+- What to expect during this phase
+- Typical behaviors and changes parents might observe
+- Sleep, feeding, and interaction patterns for current age
+- Tips for supporting development at this stage
+- When to expect the next phase transition
+
+**Coverage**: Full first year (0-52 weeks corrected age), with phase-by-phase guidance
+
+**Integration Points**:
+- Combine Wonder Weeks leap data with general developmental phases
+- Reference upcoming milestones in the summary
+- Adjust language based on whether child is in a leap period or calm phase
+- Consider prematurity context in all guidance
+
+### Implementation Guidance
+
+**Data Structure**:
+- Create DEVELOPMENTAL_PHASES constant in sensor.py similar to WONDER_WEEKS and MILESTONES
+- Each phase should cover age range (e.g., weeks 0-2, weeks 2-6, weeks 6-12, etc.)
+- Include: phase_name, age_range, what_to_expect (list), typical_behaviors (list), parent_tips (list)
+- Store in both German and English in translation files
+
+**API Endpoint**:
+- `GET /api/daily-summary`: Returns current phase info, Wonder Week status, upcoming milestones, and contextual guidance
+- Response should synthesize data from multiple sources (phases, leaps, milestones)
+- Include "days_in_phase" and "days_until_next_phase" for progress tracking
+
+**UI Component**:
+- Add prominent "Today's Summary" card at top of dashboard
+- Show current phase with description
+- Expandable sections for "What to Expect", "Tips for Parents", "Next Phase Preview"
+- Visual indicator of phase progress (e.g., progress bar or timeline)
+- Auto-update daily (cache summary per day, not per minute)
+
+**Content Requirements**:
+- Write developmentally appropriate guidance for each phase
+- Be reassuring and informative, not prescriptive or alarming
+- Always include disclaimer that every baby develops differently
+- Reference that these are adjusted for corrected age
+- Provide actionable, specific tips (not generic advice)
+
+### Example Phase Structure
+
+```python
+DEVELOPMENTAL_PHASES = [
+    {
+        "age_weeks_start": 0,
+        "age_weeks_end": 2,
+        "phase_name": "Newborn Adjustment",
+        "what_to_expect": [
+            "Adjusting to life outside the womb",
+            "Lots of sleep (16-20 hours per day)",
+            "Feeding every 2-3 hours",
+            "Limited but growing alertness periods"
+        ],
+        "typical_behaviors": [
+            "Startle reflex to loud sounds",
+            "Focuses on faces 8-12 inches away",
+            "Rooting and sucking reflexes strong",
+            "Communicates through crying"
+        ],
+        "parent_tips": [
+            "Respond promptly to crying - you cannot spoil a newborn",
+            "Skin-to-skin contact helps regulation",
+            "Watch for feeding cues before crying starts",
+            "Rest when baby rests"
+        ]
+    },
+    # ... more phases covering full first year
+]
+```
+
+### Testing Requirements
+
+When implementing:
+- Test that phase detection works correctly across all age ranges
+- Verify no gaps or overlaps in phase coverage
+- Ensure translations are complete and culturally appropriate
+- Test edge cases (e.g., exactly on phase boundary, very premature babies)
+- Validate that summary updates daily, not on every page load
+
 ## Development Commands
 
 ### Testing
