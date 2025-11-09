@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Early Bird - {{ config.child_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .age-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 15px 0;
+        }
+        .age-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .milestone-item, .leap-item {
+            padding: 12px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .milestone-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        .weeks-until {
+            color: #764ba2;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #764ba2;
+        }
+        .leap-active {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐣 Early Bird - {{ config.child_name }}</h1>
+            <p>Entwicklungstracker für Frühgeborene</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📅 Alter</h2>
+                <div id="age-info">
+                    <div class="loading">Lade Altersinformationen...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🌟 Wonder Weeks</h2>
+                <div id="wonder-weeks">
+                    <div class="loading">Lade Wonder Weeks...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Kommende Meilensteine</h2>
+                <div id="milestones">
+                    <div class="loading">Lade Meilensteine...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📊 Wachstum erfassen</h2>
+                <form id="growth-form">
+                    <div class="form-group">
+                        <label for="weight">Gewicht (kg):</label>
+                        <input type="number" id="weight" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Größe (cm):</label>
+                        <input type="number" id="height" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="head">Kopfumfang (cm) - optional:</label>
+                        <input type="number" id="head" step="0.1">
+                    </div>
+                    <button type="submit" class="btn">Wachstum speichern</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>✨ Meilenstein erfassen</h2>
+                <form id="milestone-form">
+                    <div class="form-group">
+                        <label for="category">Kategorie:</label>
+                        <select id="category" required>
+                            <option value="motor">Motorik</option>
+                            <option value="cognitive">Kognition</option>
+                            <option value="language">Sprache</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="milestone">Meilenstein:</label>
+                        <input type="text" id="milestone" required placeholder="z.B. Erstes Lächeln">
+                    </div>
+                    <button type="submit" class="btn">Meilenstein speichern</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display age information
+        async function loadAgeInfo() {
+            try {
+                const response = await fetch('/api/age');
+                const data = await response.json();
+                const ageDiv = document.getElementById('age-info');
+                
+                const corrected = data.corrected_age;
+                const actual = data.actual_age;
+                const prem = data.prematurity;
+                
+                ageDiv.innerHTML = `
+                    <div>
+                        <div class="age-label">Korrigiertes Alter:</div>
+                        <div class="age-display">${corrected.years}J ${corrected.months}M ${corrected.weeks}W ${corrected.days}T</div>
+                        <div class="age-label">Tatsächliches Alter: ${actual.years}J ${actual.months}M ${actual.weeks}W ${actual.days}T</div>
+                        <div class="age-label">Frühgeburt: ${prem.weeks} Wochen ${prem.days} Tage zu früh</div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">${corrected.total_weeks}</div>
+                            <div class="stat-label">Wochen</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${corrected.total_days}</div>
+                            <div class="stat-label">Tage</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading age:', error);
+            }
+        }
+
+        // Fetch and display Wonder Weeks
+        async function loadWonderWeeks() {
+            try {
+                const response = await fetch('/api/wonder-weeks');
+                const data = await response.json();
+                const wwDiv = document.getElementById('wonder-weeks');
+                
+                let html = `<div class="age-label">Aktuelle Woche: ${data.current_week}</div>`;
+                
+                if (data.current_leap) {
+                    html += `
+                        <div class="leap-item leap-active">
+                            <strong>🌟 Aktueller Sprung!</strong><br>
+                            Woche ${data.current_leap.week}: ${data.current_leap.name}<br>
+                            <span class="weeks-until">Dauer: ${data.current_leap.duration}</span>
+                        </div>
+                    `;
+                } else if (data.next_leap) {
+                    const weeksUntil = data.next_leap.week - data.current_week;
+                    html += `
+                        <div class="leap-item">
+                            <strong>Nächster Sprung:</strong><br>
+                            Woche ${data.next_leap.week}: ${data.next_leap.name}<br>
+                            <span class="weeks-until">In ${weeksUntil} Wochen</span>
+                        </div>
+                    `;
+                } else {
+                    html += '<p>Alle Wonder Weeks abgeschlossen! 🎉</p>';
+                }
+                
+                wwDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading wonder weeks:', error);
+            }
+        }
+
+        // Fetch and display milestones
+        async function loadMilestones() {
+            try {
+                const response = await fetch('/api/milestones');
+                const data = await response.json();
+                const msDiv = document.getElementById('milestones');
+                
+                if (data.length === 0) {
+                    msDiv.innerHTML = '<p>Keine kommenden Meilensteine in den nächsten 12 Wochen.</p>';
+                    return;
+                }
+                
+                const categoryNames = {
+                    'motor': 'Motorik',
+                    'cognitive': 'Kognition',
+                    'language': 'Sprache'
+                };
+                
+                let html = '';
+                data.slice(0, 5).forEach(ms => {
+                    html += `
+                        <div class="milestone-item">
+                            <span class="milestone-category">${categoryNames[ms.category]}</span>
+                            <div>${ms.milestone}</div>
+                            <div class="weeks-until">${ms.weeks_until === 0 ? 'Diese Woche!' : 'In ' + ms.weeks_until + ' Wochen'}</div>
+                        </div>
+                    `;
+                });
+                
+                msDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading milestones:', error);
+            }
+        }
+
+        // Handle growth form submission
+        document.getElementById('growth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const weight = document.getElementById('weight').value;
+            const height = document.getElementById('height').value;
+            const head = document.getElementById('head').value;
+            
+            try {
+                const response = await fetch('/api/growth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        weight_kg: parseFloat(weight),
+                        height_cm: parseFloat(height),
+                        head_circumference_cm: head ? parseFloat(head) : null
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Wachstumsdaten erfolgreich gespeichert!');
+                    e.target.reset();
+                }
+            } catch (error) {
+                console.error('Error saving growth:', error);
+                alert('Fehler beim Speichern der Wachstumsdaten.');
+            }
+        });
+
+        // Handle milestone form submission
+        document.getElementById('milestone-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const category = document.getElementById('category').value;
+            const milestone = document.getElementById('milestone').value;
+            
+            try {
+                const response = await fetch('/api/milestone-achievements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        category: category,
+                        milestone: milestone
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Meilenstein erfolgreich gespeichert!');
+                    e.target.reset();
+                }
+            } catch (error) {
+                console.error('Error saving milestone:', error);
+                alert('Fehler beim Speichern des Meilensteins.');
+            }
+        });
+
+        // Load all data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAgeInfo();
+            loadWonderWeeks();
+            loadMilestones();
+            
+            // Refresh age info every minute
+            setInterval(loadAgeInfo, 60000);
+        });
+    </script>
+</body>
+</html>

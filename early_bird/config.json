@@ -1,0 +1,31 @@
+{
+  "name": "Early Bird",
+  "version": "1.0.0",
+  "slug": "early_bird",
+  "description": "Track development of premature children with corrected age calculations, milestone tracking, and Wonder Weeks integration",
+  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "startup": "application",
+  "boot": "auto",
+  "init": false,
+  "ports": {
+    "8099/tcp": 8099
+  },
+  "ports_description": {
+    "8099/tcp": "Web interface"
+  },
+  "options": {
+    "child_name": "Baby",
+    "birth_date": "",
+    "due_date": "",
+    "language": "de",
+    "notifications_enabled": true
+  },
+  "schema": {
+    "child_name": "str",
+    "birth_date": "str",
+    "due_date": "str",
+    "language": "list(de|en)?",
+    "notifications_enabled": "bool?"
+  },
+  "image": "ghcr.io/schmacka/early-bird-{arch}"
+}

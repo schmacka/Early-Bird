@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "child_name": {
+      "name": "Name des Kindes",
+      "description": "Der Name Ihres Kindes"
+    },
+    "birth_date": {
+      "name": "Geburtsdatum",
+      "description": "Das tatsächliche Geburtsdatum (YYYY-MM-DD)"
+    },
+    "due_date": {
+      "name": "Errechneter Geburtstermin",
+      "description": "Der ursprünglich errechnete Geburtstermin (YYYY-MM-DD)"
+    },
+    "language": {
+      "name": "Sprache",
+      "description": "Sprache der Benutzeroberfläche"
+    },
+    "notifications_enabled": {
+      "name": "Benachrichtigungen aktiviert",
+      "description": "Home Assistant Benachrichtigungen für Entwicklungssprünge aktivieren"
+    }
+  },
+  "state": {
+    "corrected_age": "Korrigiertes Alter",
+    "actual_age": "Tatsächliches Alter",
+    "wonder_week": "Wonder Week",
+    "milestone": "Meilenstein",
+    "growth": "Wachstum"
+  },
+  "wonder_weeks": {
+    "5": "Veränderte Sinneswahrnehmungen",
+    "8": "Muster",
+    "12": "Fließende Übergänge",
+    "19": "Ereignisse",
+    "26": "Zusammenhänge",
+    "37": "Kategorien",
+    "46": "Reihenfolgen",
+    "55": "Programme",
+    "64": "Prinzipien",
+    "75": "Systeme"
+  },
+  "categories": {
+    "motor": "Motorik",
+    "cognitive": "Kognition",
+    "language": "Sprache"
+  },
+  "notifications": {
+    "wonder_week_starting": "Ein neuer Entwicklungssprung beginnt!",
+    "milestone_due": "Ein Meilenstein steht bevor",
+    "growth_reminder": "Zeit für eine Wachstumsmessung"
+  }
+}
