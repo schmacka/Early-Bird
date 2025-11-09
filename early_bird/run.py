@@ -140,6 +140,113 @@ def api_complete_u_examination():
     )
     return jsonify(record)
 
+# Sleep Pattern Tracking Endpoints
+
+@app.route('/api/sleep', methods=['POST'])
+def api_add_sleep():
+    """Add sleep record"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    data = request.json
+    record = sensor.add_sleep_record(
+        sleep_type=data.get('sleep_type'),
+        start_time=data.get('start_time'),
+        end_time=data.get('end_time'),
+        quality=data.get('quality', 'normal'),
+        notes=data.get('notes', '')
+    )
+    return jsonify(record)
+
+@app.route('/api/sleep/summary')
+def api_sleep_summary():
+    """Get sleep summary"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    date = request.args.get('date')
+    days_back = int(request.args.get('days_back', 7))
+
+    return jsonify(sensor.get_sleep_summary(date, days_back))
+
+@app.route('/api/sleep/records')
+def api_sleep_records():
+    """Get sleep records"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    limit = int(request.args.get('limit', 50))
+    return jsonify({"records": sensor.get_sleep_records(limit)})
+
+# Progress Reminder Endpoints
+
+@app.route('/api/progress-reminder')
+def api_progress_reminder():
+    """Get progress reminder"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    weeks_back = int(request.args.get('weeks_back', 4))
+    return jsonify(sensor.get_progress_reminder(weeks_back))
+
+# Growth Chart Endpoints
+
+@app.route('/api/growth/chart/<measurement_type>')
+def api_growth_chart(measurement_type):
+    """Get growth chart data"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    return jsonify(sensor.get_growth_chart_data(measurement_type))
+
+@app.route('/api/growth/statistics')
+def api_growth_statistics():
+    """Get growth statistics"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    return jsonify(sensor.get_growth_statistics())
+
+# Pride Archive Endpoints
+
+@app.route('/api/pride-archive')
+def api_pride_archive():
+    """Get complete pride archive"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    filter_category = request.args.get('category')
+    sort_order = request.args.get('sort', 'desc')
+
+    return jsonify(sensor.get_pride_archive(filter_category, sort_order))
+
+@app.route('/api/pride-archive/monthly/<year_month>')
+def api_monthly_summary(year_month):
+    """Get monthly summary"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    return jsonify(sensor.get_monthly_summary(year_month))
+
+# Calming Techniques & Bonding Tips Pages
+
+@app.route('/calming-techniques')
+def calming_techniques_page():
+    """Calming techniques information page"""
+    return render_template('calming_techniques.html', config=config)
+
+@app.route('/bonding-tips')
+def bonding_tips_page():
+    """Bonding tips information page"""
+    return render_template('bonding_tips.html', config=config)
+
+@app.route('/archive')
+def archive_page():
+    """Pride archive timeline page"""
+    if not sensor:
+        return render_template('setup.html')
+    return render_template('archive.html', config=config)
+
 @app.route('/health')
 def health():
     """Health check endpoint"""

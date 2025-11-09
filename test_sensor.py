@@ -226,12 +226,180 @@ def test_summary(sensor):
 
     print("  ✓ Summary generation works!\n")
 
+def test_sleep_tracking(sensor):
+    """Test sleep pattern tracking - Phase 2 feature"""
+    print("Testing sleep pattern tracking...")
+
+    # Add test sleep records
+    start_time = datetime.now()
+    end_time = start_time + timedelta(hours=10)
+
+    # Add a night sleep
+    night_record = sensor.add_sleep_record(
+        sleep_type="night",
+        start_time=start_time.isoformat(),
+        end_time=end_time.isoformat(),
+        quality="good",
+        notes="Slept through the night!"
+    )
+
+    print(f"  Added night sleep record: {night_record['duration_hours']} hours")
+    assert night_record['duration_hours'] == 10.0, "Duration calculation incorrect"
+    assert night_record['sleep_type'] == "night", "Sleep type incorrect"
+    assert night_record['quality'] == "good", "Quality incorrect"
+
+    # Add a nap
+    nap_start = start_time + timedelta(hours=12)
+    nap_end = nap_start + timedelta(hours=2)
+
+    nap_record = sensor.add_sleep_record(
+        sleep_type="nap",
+        start_time=nap_start.isoformat(),
+        end_time=nap_end.isoformat(),
+        quality="normal"
+    )
+
+    print(f"  Added nap record: {nap_record['duration_hours']} hours")
+    assert nap_record['duration_hours'] == 2.0, "Nap duration incorrect"
+
+    # Get sleep summary
+    summary = sensor.get_sleep_summary(days_back=7)
+
+    if "no_data" not in summary:
+        print(f"  Total sleep hours (7 days): {summary['total_sleep_hours']}")
+        print(f"  Average sleep per day: {summary['average_sleep_per_day']} hours")
+        print(f"  Quality distribution: {summary['quality_distribution']}")
+
+        # Check expectations are provided
+        assert "age_appropriate_expectations" in summary, "No sleep expectations"
+        expectations = summary["age_appropriate_expectations"]
+        print(f"  Age-appropriate total: {expectations['total_hours']} hours")
+
+    # Get sleep records
+    records = sensor.get_sleep_records(limit=10)
+    print(f"  Total sleep records: {len(records)}")
+    assert len(records) >= 2, "Not all records retrieved"
+
+    print("  ✓ Sleep tracking works!\n")
+
+def test_progress_reminders(sensor):
+    """Test progress reminder generation - Phase 2 feature"""
+    print("Testing progress reminders...")
+
+    # Add some growth records with different dates
+    from datetime import datetime
+
+    # Simulate older record
+    old_weight = 3.5
+    current_weight = 4.5
+
+    # Get progress reminder
+    reminder = sensor.get_progress_reminder(weeks_back=4)
+
+    print(f"  Looking back: {reminder['weeks_back']} weeks")
+    print(f"  Current corrected age: {reminder['current_corrected_age_weeks']} weeks")
+    print(f"  Past corrected age: {reminder['past_corrected_age_weeks']} weeks")
+    print(f"  Milestones achieved: {reminder['milestones_achieved_count']}")
+
+    # Check encouragement message
+    assert "encouragement" in reminder, "No encouragement message"
+    print(f"  Encouragement: {reminder['encouragement'][:60]}...")
+
+    # Check structure
+    assert "target_date" in reminder, "No target date"
+    assert "milestones_achieved" in reminder, "No milestones list"
+
+    print("  ✓ Progress reminders work!\n")
+
+def test_growth_statistics(sensor):
+    """Test growth chart data and statistics - Phase 2 feature"""
+    print("Testing growth statistics and chart data...")
+
+    # Add multiple growth records
+    sensor.add_growth_record(weight_kg=3.8, height_cm=50.0, head_circumference_cm=36.0)
+    sensor.add_growth_record(weight_kg=4.2, height_cm=51.5, head_circumference_cm=37.0)
+    sensor.add_growth_record(weight_kg=4.6, height_cm=53.0, head_circumference_cm=38.0)
+
+    # Get growth statistics
+    stats = sensor.get_growth_statistics()
+
+    if "insufficient_data" not in stats:
+        print(f"  Total weight gain: {stats['weight_gain_total_kg']} kg")
+        print(f"  Weight gain per week: {stats['weight_gain_per_week_g']} g")
+        print(f"  Height gain: {stats['height_gain_total_cm']} cm")
+        print(f"  Measurement count: {stats['measurement_count']}")
+        print(f"  Time span: {stats['time_span_weeks']} weeks")
+
+        assert stats['weight_gain_total_kg'] > 0, "Weight gain should be positive"
+        assert stats['height_gain_total_cm'] > 0, "Height gain should be positive"
+
+    # Test chart data for each measurement type
+    for measure_type in ["weight", "height", "head_circumference"]:
+        chart_data = sensor.get_growth_chart_data(measure_type)
+
+        print(f"  [{measure_type}] Chart data points: {chart_data['count']}")
+        print(f"  [{measure_type}] Unit: {chart_data['unit']}")
+
+        assert chart_data['measurement_type'] == measure_type, f"Wrong measurement type for {measure_type}"
+        assert len(chart_data['labels']) == chart_data['count'], f"Label count mismatch for {measure_type}"
+        assert len(chart_data['values']) == chart_data['count'], f"Value count mismatch for {measure_type}"
+
+    print("  ✓ Growth statistics and chart data work!\n")
+
+def test_pride_archive(sensor):
+    """Test pride archive and timeline - Phase 2 feature"""
+    print("Testing pride archive...")
+
+    # Get full archive
+    archive = sensor.get_pride_archive()
+
+    print(f"  Total events: {archive['total_count']}")
+    print(f"  Categories: {archive['categories']}")
+
+    # Verify structure
+    assert "events" in archive, "No events in archive"
+    assert "total_count" in archive, "No total count"
+    assert "categories" in archive, "No categories"
+    assert "date_range" in archive, "No date range"
+
+    # Check that events have required fields
+    if archive['events']:
+        event = archive['events'][0]
+        required_fields = ['type', 'category', 'title', 'date', 'icon']
+        for field in required_fields:
+            assert field in event, f"Missing field: {field} in event"
+        print(f"  Sample event: {event['title']} ({event['category']})")
+
+    # Test filtering by category
+    motor_archive = sensor.get_pride_archive(filter_category="motor")
+    print(f"  Motor events only: {motor_archive['total_count']}")
+
+    # Test sorting
+    asc_archive = sensor.get_pride_archive(sort_order="asc")
+    desc_archive = sensor.get_pride_archive(sort_order="desc")
+
+    if asc_archive['events'] and desc_archive['events']:
+        assert asc_archive['events'][0]['date'] <= asc_archive['events'][-1]['date'], "Ascending sort failed"
+        assert desc_archive['events'][0]['date'] >= desc_archive['events'][-1]['date'], "Descending sort failed"
+        print("  ✓ Sorting works correctly")
+
+    # Test monthly summary
+    year_month = datetime.now().strftime("%Y-%m")
+    monthly = sensor.get_monthly_summary(year_month)
+
+    print(f"  Monthly summary for {monthly['year_month']}: {monthly['count']} events")
+    assert "events" in monthly, "No events in monthly summary"
+    assert "categories" in monthly, "No categories in monthly summary"
+
+    print("  ✓ Pride archive works!\n")
+
 def main():
     print("=" * 60)
     print("Early Bird Sensor Test Suite")
     print("=" * 60 + "\n")
-    
+
     try:
+        # Phase 1 Tests
         sensor = test_corrected_age()
         test_wonder_weeks(sensor)
         test_milestones(sensor)
@@ -242,15 +410,25 @@ def main():
         test_encouragement(sensor)
         test_u_examinations(sensor)
         test_summary(sensor)
-        
+
+        # Phase 2 Tests
+        print("=" * 60)
+        print("Phase 2 Feature Tests")
+        print("=" * 60 + "\n")
+
+        test_sleep_tracking(sensor)
+        test_progress_reminders(sensor)
+        test_growth_statistics(sensor)
+        test_pride_archive(sensor)
+
         print("=" * 60)
         print("✓ All tests passed successfully!")
         print("=" * 60)
-        
+
         # Clean up test file
         if os.path.exists("/tmp/test_data.json"):
             os.remove("/tmp/test_data.json")
-        
+
         return 0
     except Exception as e:
         print(f"\n✗ Test failed with error: {e}")
