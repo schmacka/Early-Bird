@@ -29,6 +29,5 @@
     "due_date": "str",
     "language": "list(de|en)?",
     "notifications_enabled": "bool?"
-  },
-  "image": "ghcr.io/schmacka/early-bird-{arch}"
+  }
 }
