@@ -1,6 +1,6 @@
 {
   "name": "Early Bird",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "slug": "early_bird",
   "description": "Track development of premature children with corrected age calculations, milestone tracking, and Wonder Weeks integration",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
