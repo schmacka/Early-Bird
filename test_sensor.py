@@ -85,32 +85,145 @@ def test_growth_tracking(sensor):
 def test_milestone_achievement(sensor):
     """Test milestone achievement recording"""
     print("Testing milestone achievement recording...")
-    
+
     achievement = sensor.add_milestone_achievement(
         category="motor",
         milestone_description="First smile!"
     )
-    
+
     print(f"  Recorded milestone at {achievement['corrected_age_weeks']} weeks corrected age")
     print(f"    Category: {achievement['category']}")
     print(f"    Milestone: {achievement['milestone']}")
-    
+
     history = sensor.get_milestone_history()
     print(f"  Total achievements: {len(history)}")
     print("  ✓ Milestone achievement recording works!\n")
 
+def test_life_moments(sensor):
+    """Test life_moments milestone category"""
+    print("Testing life_moments milestone category...")
+
+    # Test that life_moments are included in upcoming milestones
+    all_milestones = sensor.get_upcoming_milestones(weeks_ahead=100)
+    life_moment_milestones = [m for m in all_milestones if m['category'] == 'life_moments']
+
+    print(f"  Found {len(life_moment_milestones)} life_moments in upcoming milestones")
+    if life_moment_milestones:
+        first_moment = life_moment_milestones[0]
+        print(f"    Next life moment: {first_moment['milestone']} (in {first_moment['weeks_until']} weeks)")
+
+    # Test recording a life_moments achievement
+    achievement = sensor.add_milestone_achievement(
+        category="life_moments",
+        milestone_description="First conscious smile"
+    )
+
+    print(f"  Recorded life moment at {achievement['corrected_age_weeks']} weeks")
+    print(f"    Milestone: {achievement['milestone']}")
+
+    # Verify it's in the history
+    history = sensor.get_milestone_history()
+    life_moments_in_history = [m for m in history if m['category'] == 'life_moments']
+    print(f"  Total life moments recorded: {len(life_moments_in_history)}")
+    print("  ✓ Life moments category works!\n")
+
+def test_congratulation_messages(sensor):
+    """Test automatic congratulation message generation"""
+    print("Testing congratulation message generation...")
+
+    # Test congratulation for each category
+    categories = ["motor", "cognitive", "language", "life_moments"]
+
+    for category in categories:
+        achievement = sensor.add_milestone_achievement(
+            category=category,
+            milestone_description=f"Test {category} milestone"
+        )
+
+        # Check that congratulation message was generated
+        assert "congratulation" in achievement, f"No congratulation for {category}"
+        assert sensor.child_name in achievement["congratulation"], f"Child name not in {category} congratulation"
+
+        print(f"  [{category}] {achievement['congratulation']}")
+
+    print("  ✓ Congratulation messages generated correctly!\n")
+
+def test_encouragement(sensor):
+    """Test daily encouragement generation"""
+    print("Testing daily encouragement system...")
+
+    # Test basic encouragement generation
+    encouragement = sensor.get_daily_encouragement()
+
+    print(f"  Message: {encouragement['message']}")
+    print(f"  Context: {encouragement['context']}")
+
+    # Verify message structure
+    assert "message" in encouragement, "No message in encouragement"
+    assert "context" in encouragement, "No context in encouragement"
+    assert "date" in encouragement, "No date in encouragement"
+    assert sensor.child_name in encouragement["message"], "Child name not in encouragement"
+
+    # Test that context is valid
+    valid_contexts = ["wonder_week_active", "wonder_week_calm", "milestone_upcoming",
+                      "milestone_achieved", "general", "premature_specific"]
+    assert encouragement["context"] in valid_contexts, f"Invalid context: {encouragement['context']}"
+
+    print("  ✓ Daily encouragement works!\n")
+
+def test_u_examinations(sensor):
+    """Test U-examination tracking"""
+    print("Testing U-examination system...")
+
+    # Get U-examination status
+    status = sensor.get_u_examinations_status()
+
+    print(f"  Total U-examinations: {status['total_count']}")
+    print(f"  Completed: {status['completed_count']}")
+    print(f"  Current (due now): {len(status['current'])}")
+    print(f"  Upcoming: {len(status['upcoming'])}")
+
+    # Verify structure
+    assert "past" in status, "No past exams in status"
+    assert "current" in status, "No current exams in status"
+    assert "upcoming" in status, "No upcoming exams in status"
+    assert "completed_count" in status, "No completed count"
+    assert "total_count" in status, "No total count"
+
+    # Test marking an examination as completed
+    record = sensor.mark_u_examination_completed(
+        exam_name="U3",
+        notes="Test examination completed successfully"
+    )
+
+    print(f"  Marked U3 as completed at {record['corrected_age_weeks']} weeks")
+    assert "exam_name" in record, "No exam name in record"
+    assert record["exam_name"] == "U3", "Wrong exam name"
+    assert "notes" in record, "No notes in record"
+
+    # Verify it appears in completed list
+    status_updated = sensor.get_u_examinations_status()
+    assert status_updated["completed_count"] == 1, "Completed count not updated"
+
+    print("  ✓ U-examination tracking works!\n")
+
 def test_summary(sensor):
     """Test comprehensive summary"""
     print("Testing summary generation...")
-    
+
     summary = sensor.get_summary()
-    
+
     print(f"  Child name: {summary['child_name']}")
     print(f"  Corrected age (weeks): {summary['age']['corrected_age']['total_weeks']}")
     print(f"  Current week: {summary['wonder_week']['current_week']}")
     print(f"  Upcoming milestones: {len(summary['upcoming_milestones'])}")
     print(f"  Growth records: {summary['growth_records_count']}")
     print(f"  Milestone achievements: {summary['milestone_achievements_count']}")
+
+    # Verify daily encouragement is included
+    assert "daily_encouragement" in summary, "Daily encouragement not in summary"
+    print(f"  Daily encouragement: {summary['daily_encouragement']['message'][:50]}...")
+
     print("  ✓ Summary generation works!\n")
 
 def main():
@@ -124,6 +237,10 @@ def main():
         test_milestones(sensor)
         test_growth_tracking(sensor)
         test_milestone_achievement(sensor)
+        test_life_moments(sensor)
+        test_congratulation_messages(sensor)
+        test_encouragement(sensor)
+        test_u_examinations(sensor)
         test_summary(sensor)
         
         print("=" * 60)

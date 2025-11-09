@@ -43,11 +43,37 @@
   "categories": {
     "motor": "Motor Skills",
     "cognitive": "Cognitive",
-    "language": "Language"
+    "language": "Language",
+    "life_moments": "Special Moments"
   },
   "notifications": {
     "wonder_week_starting": "A new developmental leap is starting!",
     "milestone_due": "A milestone is coming up",
     "growth_reminder": "Time for a growth measurement"
+  },
+  "milestones": {
+    "life_moments": {
+      "4": "First conscious smile",
+      "6": "First night with 4+ hours sleep",
+      "12": "First laugh",
+      "16": "Recognizes siblings/pets",
+      "20": "First solid food meal",
+      "24": "First tear while laughing",
+      "32": "Waves goodbye",
+      "36": "Plays peek-a-boo",
+      "40": "Claps hands",
+      "44": "Points with finger",
+      "48": "Gives kisses",
+      "52": "Says 'Mama' or 'Papa' intentionally",
+      "60": "Dances to music",
+      "68": "Hugs spontaneously",
+      "78": "Says 'I love you'"
+    }
+  },
+  "congratulations": {
+    "title": "Congratulations!",
+    "logged_at": "Logged on",
+    "at_corrected_age": "At corrected age of",
+    "close": "Close"
   }
 }

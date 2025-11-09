@@ -139,6 +139,62 @@
             padding: 20px;
             color: #666;
         }
+        /* Congratulation Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 10% auto;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideIn 0.5s;
+        }
+        .modal-content h2 {
+            color: white;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        .modal .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal .close:hover {
+            color: #ddd;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -146,6 +202,19 @@
         <div class="header">
             <h1>🐣 Early Bird - {{ config.child_name }}</h1>
             <p>Entwicklungstracker für Frühgeborene</p>
+            <p style="margin-top: 15px;">
+                <a href="/information" style="background: white; color: #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                    📋 Informationen & Unterstützung
+                </a>
+            </p>
+        </div>
+
+        <!-- Daily Encouragement Card -->
+        <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; margin-bottom: 20px;">
+            <h2 style="color: white; border-color: white;">💝 Heutige Mutmachbotschaft</h2>
+            <div id="dailyEncouragement" style="font-size: 1.2em; line-height: 1.6; text-align: center; padding: 15px;">
+                <div class="loading" style="color: white;">Lade Mutmachbotschaft...</div>
+            </div>
         </div>
 
         <div class="dashboard">
@@ -167,6 +236,13 @@
                 <h2>🎯 Kommende Meilensteine</h2>
                 <div id="milestones">
                     <div class="loading">Lade Meilensteine...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🏥 U-Untersuchungen</h2>
+                <div id="u-examinations">
+                    <div class="loading">Lade U-Untersuchungen...</div>
                 </div>
             </div>
         </div>
@@ -200,6 +276,7 @@
                             <option value="motor">Motorik</option>
                             <option value="cognitive">Kognition</option>
                             <option value="language">Sprache</option>
+                            <option value="life_moments">❤️ Besondere Momente</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -209,6 +286,17 @@
                     <button type="submit" class="btn">Meilenstein speichern</button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Congratulation Modal -->
+    <div id="congratulationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>🎉 Herzlichen Glückwunsch! 🎉</h2>
+            <p id="congratulationMessage"></p>
+            <p><strong>Eingetragen am:</strong> <span id="congratulationDate"></span></p>
+            <p><strong>Korrigiertes Alter:</strong> <span id="congratulationAge"></span> Wochen</p>
         </div>
     </div>
 
@@ -298,7 +386,8 @@
                 const categoryNames = {
                     'motor': 'Motorik',
                     'cognitive': 'Kognition',
-                    'language': 'Sprache'
+                    'language': 'Sprache',
+                    'life_moments': '❤️ Besondere Momente'
                 };
                 
                 let html = '';
@@ -352,10 +441,10 @@
         // Handle milestone form submission
         document.getElementById('milestone-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const category = document.getElementById('category').value;
             const milestone = document.getElementById('milestone').value;
-            
+
             try {
                 const response = await fetch('/api/milestone-achievements', {
                     method: 'POST',
@@ -367,9 +456,17 @@
                         milestone: milestone
                     })
                 });
-                
+
                 if (response.ok) {
-                    alert('Meilenstein erfolgreich gespeichert!');
+                    const data = await response.json();
+
+                    // Show congratulation modal if available
+                    if (data.congratulation) {
+                        showCongratulation(data);
+                    } else {
+                        alert('Meilenstein erfolgreich gespeichert!');
+                    }
+
                     e.target.reset();
                 }
             } catch (error) {
@@ -378,12 +475,102 @@
             }
         });
 
+        // Show congratulation modal
+        function showCongratulation(achievement) {
+            const modal = document.getElementById('congratulationModal');
+            const message = document.getElementById('congratulationMessage');
+            const date = document.getElementById('congratulationDate');
+            const age = document.getElementById('congratulationAge');
+
+            message.textContent = achievement.congratulation;
+
+            // Format date
+            const achievementDate = new Date(achievement.date);
+            date.textContent = achievementDate.toLocaleDateString('de-DE');
+
+            age.textContent = achievement.corrected_age_weeks;
+
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('congratulationModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('congratulationModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Fetch and display daily encouragement
+        async function loadEncouragement() {
+            try {
+                const response = await fetch('/api/encouragement');
+                const data = await response.json();
+                const encDiv = document.getElementById('dailyEncouragement');
+
+                encDiv.innerHTML = `<p>${data.message}</p>`;
+            } catch (error) {
+                console.error('Error loading encouragement:', error);
+            }
+        }
+
+        // Fetch and display U-examinations
+        async function loadUExaminations() {
+            try {
+                const response = await fetch('/api/u-examinations');
+                const data = await response.json();
+                const uDiv = document.getElementById('u-examinations');
+
+                let html = '';
+
+                // Show current examinations
+                if (data.current && data.current.length > 0) {
+                    html += '<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 10px;">';
+                    html += '<strong>🔔 Aktuell fällig:</strong><br>';
+                    data.current.forEach(exam => {
+                        const checkmark = exam.is_completed ? '✅' : '⏰';
+                        html += `<div style="margin-top: 10px;">${checkmark} <strong>${exam.name}</strong> - ${exam.description}</div>`;
+                    });
+                    html += '</div>';
+                }
+
+                // Show upcoming examinations
+                if (data.upcoming && data.upcoming.length > 0) {
+                    html += '<div style="margin-top: 10px;"><strong>Demnächst:</strong></div>';
+                    data.upcoming.slice(0, 2).forEach(exam => {
+                        const weeksText = exam.weeks_until < 1 ? 'Diese Woche' : `In ${Math.round(exam.weeks_until)} Wochen`;
+                        html += `<div style="margin-top: 8px; color: #666;">${exam.name} - ${weeksText}</div>`;
+                    });
+                }
+
+                // Show progress
+                html += `<div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">`;
+                html += `<strong>Fortschritt:</strong> ${data.completed_count} / ${data.total_count} abgeschlossen`;
+                html += `<div style="background: #eee; height: 10px; border-radius: 5px; margin-top: 8px;">`;
+                const percentage = (data.completed_count / data.total_count) * 100;
+                html += `<div style="background: #667eea; height: 100%; width: ${percentage}%; border-radius: 5px;"></div>`;
+                html += `</div></div>`;
+
+                uDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading U-examinations:', error);
+            }
+        }
+
         // Load all data on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadAgeInfo();
             loadWonderWeeks();
             loadMilestones();
-            
+            loadEncouragement();
+            loadUExaminations();
+
             // Refresh age info every minute
             setInterval(loadAgeInfo, 60000);
         });

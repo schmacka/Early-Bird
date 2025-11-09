@@ -44,12 +44,24 @@ def index():
         return render_template('setup.html')
     return render_template('index.html', config=config)
 
+@app.route('/information')
+def information_page():
+    """Information page for parents"""
+    return render_template('information.html', config=config)
+
 @app.route('/api/summary')
 def api_summary():
     """Get complete summary"""
     if not sensor:
         return jsonify({"error": "Sensor not configured"}), 400
     return jsonify(sensor.get_summary())
+
+@app.route('/api/encouragement')
+def api_encouragement():
+    """Get daily encouragement"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+    return jsonify(sensor.get_daily_encouragement())
 
 @app.route('/api/age')
 def api_age():
@@ -106,6 +118,27 @@ def api_milestone_achievements():
         return jsonify(achievement)
     else:
         return jsonify(sensor.get_milestone_history())
+
+@app.route('/api/u-examinations')
+def api_u_examinations():
+    """Get U-examinations status"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+    return jsonify(sensor.get_u_examinations_status())
+
+@app.route('/api/u-examinations/complete', methods=['POST'])
+def api_complete_u_examination():
+    """Mark U-examination as completed"""
+    if not sensor:
+        return jsonify({"error": "Sensor not configured"}), 400
+
+    data = request.json
+    record = sensor.mark_u_examination_completed(
+        exam_name=data.get('exam_name'),
+        date=data.get('date'),
+        notes=data.get('notes', '')
+    )
+    return jsonify(record)
 
 @app.route('/health')
 def health():
