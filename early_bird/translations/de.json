@@ -43,11 +43,37 @@
   "categories": {
     "motor": "Motorik",
     "cognitive": "Kognition",
-    "language": "Sprache"
+    "language": "Sprache",
+    "life_moments": "Besondere Momente"
   },
   "notifications": {
     "wonder_week_starting": "Ein neuer Entwicklungssprung beginnt!",
     "milestone_due": "Ein Meilenstein steht bevor",
     "growth_reminder": "Zeit für eine Wachstumsmessung"
+  },
+  "milestones": {
+    "life_moments": {
+      "4": "Erstes bewusstes Lächeln",
+      "6": "Erste Nacht mit 4+ Stunden Schlaf",
+      "12": "Erstes Lachen",
+      "16": "Erkennt Geschwister/Haustiere",
+      "20": "Erste Brei-Mahlzeit",
+      "24": "Erste Träne beim Lachen",
+      "32": "Winkt zum Abschied",
+      "36": "Spielt Guck-Guck",
+      "40": "Klatscht in die Hände",
+      "44": "Zeigt mit dem Finger",
+      "48": "Gibt Küsschen",
+      "52": "Sagt 'Mama' oder 'Papa' bewusst",
+      "60": "Tanzt zur Musik",
+      "68": "Umarmt von selbst",
+      "78": "Sagt 'Ich hab dich lieb'"
+    }
+  },
+  "congratulations": {
+    "title": "Herzlichen Glückwunsch!",
+    "logged_at": "Eingetragen am",
+    "at_corrected_age": "Im korrigierten Alter von",
+    "close": "Schließen"
   }
 }
