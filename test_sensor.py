@@ -16,6 +16,7 @@ def test_corrected_age():
     print("Testing corrected age calculation...")
     
     # Create a test case: baby born 8 weeks early
+    # Note: These are synthetic test dates, not real personal data
     birth_date = "2024-01-01"
     due_date = "2024-02-26"  # ~8 weeks after birth
     
