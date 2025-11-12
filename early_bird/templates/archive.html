@@ -275,10 +275,13 @@
             <div class="loading">⏳ Lade Archiv...</div>
         </div>
 
-        <a href="/" class="back-link">← Zurück zum Dashboard</a>
+        <a href="{{ ingress_path }}/" class="back-link">← Zurück zum Dashboard</a>
     </div>
 
     <script>
+        // Base path for API calls (handles Home Assistant ingress)
+        const BASE_PATH = '{{ ingress_path }}';
+
         let currentCategory = null;
         let currentSort = 'desc';
         let archiveData = null;
@@ -316,7 +319,7 @@
                 }
                 params.append('sort', currentSort);
 
-                const response = await fetch(`/api/pride-archive?${params}`);
+                const response = await fetch(`${BASE_PATH}/api/pride-archive?${params}`);
                 const data = await response.json();
                 archiveData = data;
 

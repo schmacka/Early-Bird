@@ -203,16 +203,16 @@
             <h1>🐣 Early Bird - {{ config.child_name }}</h1>
             <p>Entwicklungstracker für Frühgeborene</p>
             <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
-                <a href="/archive" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                <a href="{{ ingress_path }}/archive" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                     🏆 Stolz-Archiv
                 </a>
-                <a href="/information" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                <a href="{{ ingress_path }}/information" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                     📋 Informationen & Unterstützung
                 </a>
-                <a href="/calming-techniques" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                <a href="{{ ingress_path }}/calming-techniques" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                     🤱 Beruhigungstechniken
                 </a>
-                <a href="/bonding-tips" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                <a href="{{ ingress_path }}/bonding-tips" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
                     💕 Bindungstipps
                 </a>
             </div>
@@ -310,10 +310,13 @@
     </div>
 
     <script>
+        // Base path for API calls (handles Home Assistant ingress)
+        const BASE_PATH = '{{ ingress_path }}';
+
         // Fetch and display age information
         async function loadAgeInfo() {
             try {
-                const response = await fetch('/api/age');
+                const response = await fetch(BASE_PATH + '/api/age');
                 const data = await response.json();
                 const ageDiv = document.getElementById('age-info');
                 
@@ -347,7 +350,7 @@
         // Fetch and display Wonder Weeks
         async function loadWonderWeeks() {
             try {
-                const response = await fetch('/api/wonder-weeks');
+                const response = await fetch(BASE_PATH + '/api/wonder-weeks');
                 const data = await response.json();
                 const wwDiv = document.getElementById('wonder-weeks');
                 
@@ -383,7 +386,7 @@
         // Fetch and display milestones
         async function loadMilestones() {
             try {
-                const response = await fetch('/api/milestones');
+                const response = await fetch(BASE_PATH + '/api/milestones');
                 const data = await response.json();
                 const msDiv = document.getElementById('milestones');
                 
@@ -425,7 +428,7 @@
             const head = document.getElementById('head').value;
             
             try {
-                const response = await fetch('/api/growth', {
+                const response = await fetch(BASE_PATH + '/api/growth', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -455,7 +458,7 @@
             const milestone = document.getElementById('milestone').value;
 
             try {
-                const response = await fetch('/api/milestone-achievements', {
+                const response = await fetch(BASE_PATH + '/api/milestone-achievements', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -519,7 +522,7 @@
         // Fetch and display daily encouragement
         async function loadEncouragement() {
             try {
-                const response = await fetch('/api/encouragement');
+                const response = await fetch(BASE_PATH + '/api/encouragement');
                 const data = await response.json();
                 const encDiv = document.getElementById('dailyEncouragement');
 
@@ -532,7 +535,7 @@
         // Fetch and display U-examinations
         async function loadUExaminations() {
             try {
-                const response = await fetch('/api/u-examinations');
+                const response = await fetch(BASE_PATH + '/api/u-examinations');
                 const data = await response.json();
                 const uDiv = document.getElementById('u-examinations');
 

@@ -10,6 +10,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Helper function to get ingress path
+def get_ingress_path():
+    """Get the ingress path from Home Assistant headers"""
+    return request.headers.get('X-Ingress-Path', '')
+
 # Load configuration from Home Assistant
 def load_config():
     """Load configuration from options.json"""
@@ -41,13 +46,13 @@ if config.get('birth_date') and config.get('due_date'):
 def index():
     """Main dashboard page"""
     if not sensor:
-        return render_template('setup.html')
-    return render_template('index.html', config=config)
+        return render_template('setup.html', ingress_path=get_ingress_path())
+    return render_template('index.html', config=config, ingress_path=get_ingress_path())
 
 @app.route('/information')
 def information_page():
     """Information page for parents"""
-    return render_template('information.html', config=config)
+    return render_template('information.html', config=config, ingress_path=get_ingress_path())
 
 @app.route('/api/summary')
 def api_summary():
@@ -233,19 +238,19 @@ def api_monthly_summary(year_month):
 @app.route('/calming-techniques')
 def calming_techniques_page():
     """Calming techniques information page"""
-    return render_template('calming_techniques.html', config=config)
+    return render_template('calming_techniques.html', config=config, ingress_path=get_ingress_path())
 
 @app.route('/bonding-tips')
 def bonding_tips_page():
     """Bonding tips information page"""
-    return render_template('bonding_tips.html', config=config)
+    return render_template('bonding_tips.html', config=config, ingress_path=get_ingress_path())
 
 @app.route('/archive')
 def archive_page():
     """Pride archive timeline page"""
     if not sensor:
-        return render_template('setup.html')
-    return render_template('archive.html', config=config)
+        return render_template('setup.html', ingress_path=get_ingress_path())
+    return render_template('archive.html', config=config, ingress_path=get_ingress_path())
 
 @app.route('/health')
 def health():
